@@ -1,0 +1,450 @@
+openapi: 3.0.0
+info:
+  title: IED Secure Storage APIs
+  version: '1.0'
+  description: |-
+    IED Secure Storage API documentation.
+
+    Application stores data in secure storage in key-value pair, where the unique key is used to identify the respective value.
+
+    - An application can have multiple key-value pairs, where each key is unique for its own application.
+
+    - Each application has its own set of key-value pairs.
+
+    Authentication is driven internally when an application on IED calls the API from their container to verify the API call.
+
+    These APIs can only be called by the application container. The Authorization is handled in the backend.
+
+    While storing the application data we are storing the value as it is, so it is the responsibility of the user to keep the data 
+
+    encrypted or otherwise.
+  contact:
+    name: Team ADI
+  license:
+    name: 'Industrial Edge © 2022, Siemens AG. All rights reserved.'
+servers:
+  - url: 'https://localhost/device/edge/iert/api/v1'
+    description: IED
+paths:
+  '/secure-storage/keys/{key}':
+    parameters:
+      - $ref: '#/components/parameters/key'
+    get:
+      summary: Get value for specified key in secure storage.
+      responses:
+        '200':
+          description: Retrieves the existing key-value pair from secure storage.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecureKeyValue'
+              examples:
+                GetSecureStorage:
+                  value:
+                    key: testKey
+                    value: '&_4M(-8/$5$-)4* =/'')M6&_**M)(7pL!p0_39+1M^(43^0&&-L1*@@91p2^'
+        '400':
+          description: |-
+            Bad Request: 
+            - The secure storage key is missing in the request.
+            - The maximum length of key is exceeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+              examples:
+                MissingSecureStoreKey:
+                  $ref: '#/components/examples/MissingSecureStorageKey'
+                MaxKeyLengthExceeded:
+                  $ref: '#/components/examples/MaxKeyLengthExceeded'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+      operationId: get-secure-storage-keys-key
+      description: This method returns the existing value for the corresponding key from secure storage on the IED.
+      tags:
+        - SecureStorage
+      parameters:
+        - $ref: '#/components/parameters/X-Correlation-ID'
+    put:
+      summary: Edit value for specified key in secure storage.
+      operationId: put-secure-storage-keys-key
+      responses:
+        '200':
+          description: Value updated in secure storage successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecureKeyValue'
+              examples:
+                PutSecureStorageKeyValue:
+                  value:
+                    key: testKey
+                    value: +M$95)^2(&$$/M@9*3
+        '400':
+          description: |-
+            Bad Request:
+            - Unable to parse request body.
+            - The secure storage key is missing in the request.
+            - The maximum length of key is exceeded.
+            - The maximum length of value is exceeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unableToParseRequestBody:
+                  value:
+                    errors:
+                      - code: edge.unableToParseRequestBody
+                        logref: c105072b-39cb-49d9-999f-3873b10e3db1
+                        message: Unable to parse request body.
+                MissingSecureStorageKey:
+                  $ref: '#/components/examples/MissingSecureStorageKey'
+                MaxKeyLengthExceeded:
+                  $ref: '#/components/examples/MaxKeyLengthExceeded'
+                MaxValueLengthExceeded:
+                  $ref: '#/components/examples/MaxValueLengthExceeded'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+      tags:
+        - SecureStorage
+      description: |-
+        This method updates the value associated with the key in the secure storage on IED.
+
+        __Note__: This method does not create a new key-value pair, it updates the value for specified existing key.
+      parameters:
+        - $ref: '#/components/parameters/X-Correlation-ID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              x-examples:
+                example:
+                  value: M6&_**M)(7pL!p0_39+1M^
+              properties:
+                value:
+                  type: string
+                  minLength: 1
+                  maxLength: 64000
+              required:
+                - value
+            examples:
+              PutSecureStorage:
+                value:
+                  value: +M$95)^2(&$$/M@9*3
+        description: |-
+          The value specified in the request body is in UTF-8 format.
+          The minLength and maxLength refers to the representation of the UTF-8 string in bytes.
+    delete:
+      summary: Delete key-value pair for specified key in secure storage.
+      operationId: delete-secure-storage-keys-key
+      responses:
+        '204':
+          description: 'No Content: Successfully deleted the key-value pair from secure storage.'
+        '400':
+          description: |
+            Bad Request: 
+            - The secure storage key is missing in the request.
+            - The maximum length of key is exceeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                MissingSecureStorageKey:
+                  $ref: '#/components/examples/MissingSecureStorageKey'
+                MaxKeyLengthExceeded:
+                  $ref: '#/components/examples/MaxKeyLengthExceeded'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          description: Forbidden
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+      tags:
+        - SecureStorage
+      description: |-
+        Deletes existing key-value pair from secure storage.
+
+        This method will only delete the existing key-value pair. If a non-existence key is used, then a _404 Key Not Found_ error response is returned.
+      parameters:
+        - $ref: '#/components/parameters/X-Correlation-ID'
+  /secure-storage/keys:
+    post:
+      summary: Add new key-value pair in the secure storage.
+      operationId: post-secure-store-keys
+      responses:
+        '201':
+          description: Successfully created new key-value pair in secure storage.
+        '400':
+          description: |-
+            Bad Request: 
+            - Unable to parse request body.
+            - The maximum length of key is exceeded.
+            - The maximum length of value is exceeded.
+            - Maximum keys that can be stored for an application has exceeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                UnableToParseRequestBody:
+                  value:
+                    errors:
+                      - code: edge.unableToParseRequestBody
+                        logref: c105072b-39cb-49d9-999f-3873b10e3db1
+                        message: Unable to parse request body.
+                MaxAppKeyValueCountExceeded:
+                  $ref: '#/components/examples/MaxAppKeyValueCountExceeded'
+                MaxKeyLengthExceeded:
+                  $ref: '#/components/examples/MaxKeyLengthExceeded'
+                MaxValueLengthExceeded:
+                  $ref: '#/components/examples/MaxValueLengthExceeded'
+        '401':
+          $ref: '#/components/responses/401'
+        '409':
+          description: 'Conflict: The key already exists in secure storage.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                SecureStorageKeyAlreadyExists:
+                  value:
+                    errors:
+                      - code: edge.secureStorage.keyAlreadyExists
+                        logref: c105072b-39cb-49d9-999f-3873b10e3db1
+                        message: The specified key already exists in secure storage.
+        '500':
+          $ref: '#/components/responses/500'
+      description: |-
+        This method creates new key-value pair in the secure storage on IED.
+
+        __Note__:  This method checks the current count of secrets of application stored in secure storage and returns error response, if maximum number of keys exceeded by 50.
+      parameters:
+        - $ref: '#/components/parameters/X-Correlation-ID'
+      tags:
+        - SecureStorage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecureKeyValue'
+            examples:
+              SecureStorageKeyValue:
+                value:
+                  key: testKey
+                  value: 43p-&M_&@*2!
+    parameters: []
+    get:
+      summary: Get all keys for a specific application from secure storage.
+      operationId: get-secure-storage-keys
+      responses:
+        '200':
+          description: 'Retrieves the list of existing keys from secure storage, for specified application.'
+          content:
+            application/json:
+              schema:
+                type: object
+                x-examples:
+                  example:
+                    securestoragekeys:
+                      - gh34pio0h-a340-4710-iujk-46d49f2be32a
+                      - 9681eab1a57648eef405ce0013eacc33323588c3f0eb0b5d0dd7117654644fd74d4f3c1701a6c9d3fb06d-cert
+                      - 9681eab1a57648eef405ce00132117654644fd74d4f3c1701a6c9d3fb06d-key
+                      - 9fd2c89a-0e7b-4974-be84-7b7bb9042537
+                      - b44824319-799b-42cd-af20-ae2e872a5e1a
+                properties:
+                  securestorage:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AllKeysOfApplication'
+              examples:
+                GetListOfKeys:
+                  value:
+                    securestoragekeys:
+                      - gh34pio0h-a340-4710-iujk-46d49f2be32a
+                      - 9681eab1a57648eef405ce0013eacc33323588c3f0eb0b5d0dd7117654644fd74d4f3c1701a6c9d3fb06d-cert
+                      - 9681eab1a57648eef405ce00132117654644fd74d4f3c1701a6c9d3fb06d-key
+                      - 9fd2c89a-0e7b-4974-be84-7b7bb9042537
+                      - b44824319-799b-42cd-af20-ae2e872a5e1a
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+      description: This method returns the list of all the keys of the installed application on IED that is calling the API from it's container.
+      parameters:
+        - $ref: '#/components/parameters/X-Correlation-ID'
+      tags:
+        - SecureStorage
+components:
+  schemas:
+    Error:
+      description: ''
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 1
+        logref:
+          type: string
+          minLength: 1
+        message:
+          type: string
+          minLength: 1
+      required:
+        - code
+        - logref
+        - message
+      x-examples: {}
+    ErrorResponse:
+      description: |-
+        - The Error response is a list of errors.
+
+        - The errors, if present, over one is sent in succession. 
+      type: object
+      x-examples:
+        example:
+          errors:
+            - code: string
+              logref: string
+              message: string
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+    SecureKeyValue:
+      description: |-
+        The application on IED stores its secure information in key-value pairs in secure storage. The key-value pair is in UTF-8 format.
+
+        The minLength and maxLength refers to the representation of the UTF-8 string in bytes.
+      type: object
+      x-examples:
+        example:
+          key: testKey
+          value: testValue
+      title: ''
+      properties:
+        key:
+          type: string
+          minLength: 1
+          maxLength: 256
+        value:
+          type: string
+          minLength: 0
+          maxLength: 64000
+      required:
+        - key
+        - value
+    AllKeysOfApplication:
+      type: object
+      properties:
+        securestoragekeys:
+          type: array
+          items:
+            type: string
+      x-examples:
+        GetAllKeysOfApplication:
+          securestoragekeys:
+            - 7ec38d99-a340-4710-a8db-46d49f2be32a
+            - testKey
+            - f2be32c3-aa16-4c15-b8f8-ae2e872a5e1a
+            - 6aa7dbc9-c774-46a2-aecf-e127384ae05d
+            - ars2u131-dedc-4b85-9d1e-07ec381678d3
+  responses:
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            secureStorageInvalidAuthentication:
+              value:
+                errors:
+                  - code: edge.secureStorage.InvalidAuthentication
+                    logref: c105072b-39cb-49d9-999f-3873b10e3db1
+                    message: Unauthorized resource access.
+    '404':
+      description: The specified key is not found in secure storage.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            KeyNotFound:
+              value:
+                errors:
+                  - code: edge.secureStorage.keyNotFound
+                    logref: c105072b-39cb-49d9-999f-3873b10e3db1
+                    message: The specified key is not found in secure storage.
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Internal Server Error:
+              value:
+                errors:
+                  - code: edge.internalServerError
+                    logref: c105072b-39cb-49d9-999f-3873b10e3db1
+                    message: The server encountered an unknown error.
+  requestBodies: {}
+  parameters:
+    X-Correlation-ID:
+      name: X-Correlation-ID
+      in: header
+      required: false
+      schema:
+        type: string
+      description: Correlates logs
+    key:
+      name: key
+      in: path
+      required: true
+      schema:
+        type: string
+      description: The specified key is used to identify the particular value of secure storage.
+  examples:
+    MissingSecureStorageKey:
+      value:
+        errors:
+          - code: edge.secureStorage.missingSecureStorageKey
+            logref: c105072b-39cb-49d9-999f-3873b10e3db1
+            message: The secure storage key is missing.
+    MaxKeyLengthExceeded:
+      value:
+        errors:
+          - code: edge.secureStorage.maxKeyLengthExceeds
+            logref: c105072b-39cb-49d9-999f-3873b10e3db1
+            message: The maximum length of key is exceeded.
+    MaxValueLengthExceeded:
+      value:
+        errors:
+          - code: edge.secureStorage.maxValueLengthExceeds
+            logref: c105072b-39cb-49d9-999f-3873b10e3db1
+            message: The maximum length of value is exceeded.
+    MaxAppKeyValueCountExceeded:
+      value:
+        errors:
+          - code: edge.secureStorage.maxAppKeyValueCountExceeds
+            logref: c105072b-39cb-49d9-999f-3873b10e3db1
+            message: Maximum keys that can be stored for an application has exceeded.
+tags:
+  - name: SecureStorage

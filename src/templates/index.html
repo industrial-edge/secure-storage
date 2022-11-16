@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Secure Storage</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="shortcut icon"
+      href="{{ url_for('static', filename='favicon.ico') }}"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static',filename='styles/main.css') }}"
+    />
+  </head>
+
+  <body>
+    <main>
+      <h1 class="title">Secure Storage<br />Industrial Edge</h1>
+
+      <div class="messagebar">
+        <p class="message"></p>
+        <button onclick="closeMessagebar()">
+          <img src="{{ url_for('static',filename='img/close.svg') }}" />
+        </button>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <div class="card_header">
+            <h2>Add key-value pair</h2>
+          </div>
+          <div class="card_content">
+            <form id="frm1" action="/action_page.php">
+              <label for="key"> Key: </label>
+              <input
+                type="text"
+                name="key"
+                id="key"
+                value="Donald"
+                required
+              /><br />
+              <label for="value"> Value: </label>
+              <input
+                type="text"
+                name="value"
+                id="value"
+                value="Duck"
+                required
+              /><br />
+            </form>
+          </div>
+          <div class="card_footer">
+            <button onclick="addMember()" id="addButton">
+              Add key-value pair
+            </button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card_header">
+            <h2>Stored key-value pairs</h2>
+          </div>
+          <div class="card_content">
+            <div id="members"></div>
+          </div>
+          <div class="card_footer">
+            <button onclick="refreshPage()">Refresh</button>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script
+      language="JavaScript"
+      type="text/javascript"
+      src="/static/script.js"
+    ></script>
+  </body>
+</html>

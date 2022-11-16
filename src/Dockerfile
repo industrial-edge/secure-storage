@@ -1,5 +1,4 @@
-# Copyright 2022 Siemens AG
-# This file is subject to the terms and conditions of the MIT License.  
-# See LICENSE file in the top-level directory
-
-FROM nginx:1.19.1-alpine
+FROM python:3.9-slim
+COPY . .
+RUN pip install -r requirements.txt
+CMD python3 main.py

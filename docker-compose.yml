@@ -1,14 +1,21 @@
-# Copyright 2021 Siemens AG
-# This file is subject to the terms and conditions of the MIT License.  
-# See LICENSE file in the top-level directory.
-
-# Minimalistic docker-compose file to be used in development enviroment. Running docker-compose up should start the app.
-version: '2.4'
-
+version: "2.4"
+#### Services ####
 services:
-  hello-world:
+  #### Secure storage web app ####
+  secure-storage-service:
     build: ./src
-    image: 'hello-world:1.0.0'
-    ports:
-      - '8080:80'
+    image: secure-storage-app
     restart: always
+    ports:
+      - "5001:5000"
+    networks:
+      proxy-redirect: null
+    mem_limit: 300mb
+    volumes:
+      - "./publish/:/publish/"
+      - "./cfg-data/:/cfg-data/"
+
+#### Networks ####
+networks:
+  proxy-redirect:
+    external: true
