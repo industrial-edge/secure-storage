@@ -83,4 +83,4 @@ return Response(json.dumps(key_value_pairs))
 ```
 
 ### API Specification
-For all available Secure Storage API Endpoints, their format, input and output values, please refer to the [IED Secure Storage OpenAPI Specification](./edgesecurity-1.0.0-openapi.yaml).
+For all available Secure Storage API Endpoints, their format, input and output values, please refer to the [IED Secure Storage OpenAPI Specification](https://docs.eu1.edge.siemens.cloud/developer/platform/references/ied/secure-storage-api.html).

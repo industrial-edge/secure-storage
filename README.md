@@ -24,7 +24,7 @@ The Secure Storage is a local key-value database which enables easy, high perfor
 
 The more comprehensive documentation for the Secure Storage API can be found in the official IE Platform Guides - [Secure Storage](https://docs.eu1.edge.siemens.cloud/developer/platform/guides/APIs/secure-storage.html).
 
-For the OpenAPI specification please refer to [IED Secure Storage APIs YAML](./docs/edgesecurity-1.0.0-openapi.yaml).
+For the OpenAPI specification please refer to [IED Secure Storage API Docs](https://docs.eu1.edge.siemens.cloud/developer/platform/references/ied/secure-storage-api.html).
 
 This repository describes the format and endpoints of Industiral Edge Devices Secure Storage API and demonstrates how to use this API in single container running a simple web application.
 
