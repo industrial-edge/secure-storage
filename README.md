@@ -66,7 +66,7 @@ Login to Industrial Edge Device and click on Icon of the Secure Storage Applicat
 
 ![Secure Storage App Landing Page](docs/graphics/secure-storage-app-page.png)
 
-The main content of the application consist of two cards. The first/left card contains a form that is used to add new key-value pair to the applications secure storage. To save new key-value pair to the secure storage, fill in both inputs a click on _Add key-value pair_ button. Messagebox will appear with information whether the action was successfull and the data were added or with information about error in case of a problem.
+The main content of the application consist of two cards. The first/left card contains a form that is used to add new key-value pair to the applications secure storage. To save new key-value pair to the secure storage, fill in both inputs a click on _Add key-value pair_ button. Messagebox will appear with information whether the action was successful and the data were added or with information about error in case of a problem.
 
 ![Secure Storage App First Card](docs/graphics/secure-storage-app-card-1.png)
 
