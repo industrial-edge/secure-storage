@@ -1,0 +1,12 @@
+# Copyright 2022 Siemens AG
+# This file is subject to the terms and conditions of the MIT License.  
+# See LICENSE file in the top-level directory
+
+FROM python:3.9-slim
+
+# install python dependencies
+COPY . .
+RUN pip install -r requirements.txt
+
+# build executable
+CMD ["python3", "-u", "main.py"]

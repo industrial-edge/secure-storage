@@ -41,7 +41,7 @@ For more detailed information please see the section for [uploading apps to the 
 - Create a new application using the Industrial Publisher
 - Add a new app version
 - Import the [docker-compose](../docker-compose.yml) file using the **Import YAML** button
-- The warning `Build (sevices >> scanner-service) is not supported` can be ignored
+- The warning `Build (services >> scanner-service) is not supported` can be ignored
 - **Start Upload** to transfer the app to Industrial Edge Managment
 - Further information about using the Industrial Edge App Publisher can be found in the [IE Hub](https://iehub.eu1.edge.siemens.cloud/documents/appPublisher/en/start.html)
 

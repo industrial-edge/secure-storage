@@ -28,7 +28,7 @@ The structure of the `certsips.json` file looks like this:
 ![Example of certsips.json structure](./graphics/certsips_example.png)
 
 ### Adding new key-value pair to secure storage
-To add new key-value pair to applications secure storage an POST request with the necessary data is send to `/secure-storage/keys` endpoint. This endpoint expects a key and value in a body of the request. Therefore first in the backend the check is made to see if the user provided required information. If key or value is missing, an error message is send back. Otherwise the POST request is made and information whether adding of new key-value pair was succesfull is send back to the user in the response.
+To add new key-value pair to applications secure storage an POST request with the necessary data is send to `/secure-storage/keys` endpoint. This endpoint expects a key and value in a body of the request. Therefore first in the backend the check is made to see if the user provided required information. If key or value is missing, an error message is send back. Otherwise the POST request is made and information whether adding of new key-value pair was successful is send back to the user in the response.
 
 ```python
 # Get the data from the post request
@@ -50,7 +50,7 @@ if not 'key' in data or not 'value' in data or data['key'] == '' or data['value'
 # Add the key-value pair to secure storage
 response_post = requests.request("POST", (BASE_URL + "/keys"), data=body, headers=HEADERS, verify=False)
 
-# If the reponse code == 201, adding was succesfull; send a confirmation message
+# If the reponse code == 201, adding was successful; send a confirmation message
 if response_post.status_code == 201:
     return Response('Successfully added a member', status=201)
 else:

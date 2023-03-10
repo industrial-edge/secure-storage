@@ -15,6 +15,7 @@ This example describes the IE devices local secure storage database that enables
   - [Documentation](#documentation)
   - [Contribution](#contribution)
   - [License and Legal Information](#license-and-legal-information)
+  - [Disclaimer](#disclaimer)
 
 ## Description
 
@@ -66,7 +67,7 @@ Login to Industrial Edge Device and click on Icon of the Secure Storage Applicat
 
 ![Secure Storage App Landing Page](docs/graphics/secure-storage-app-page.png)
 
-The main content of the application consist of two cards. The first/left card contains a form that is used to add new key-value pair to the applications secure storage. To save new key-value pair to the secure storage, fill in both inputs a click on _Add key-value pair_ button. Messagebox will appear with information whether the action was successfull and the data were added or with information about error in case of a problem.
+The main content of the application consist of two cards. The first/left card contains a form that is used to add new key-value pair to the applications secure storage. To save new key-value pair to the secure storage, fill in both inputs a click on _Add key-value pair_ button. Messagebox will appear with information whether the action was successful and the data were added or with information about error in case of a problem.
 
 ![Secure Storage App First Card](docs/graphics/secure-storage-app-card-1.png)
 
@@ -99,3 +100,9 @@ If you are interested in contributing via Pull Request, please check the [Contri
 ## License and Legal Information
 
 Please read the [Legal information](LICENSE.txt).
+
+## Disclaimer
+
+IMPORTANT - PLEASE READ CAREFULLY:
+
+This documentation describes how you can download and set up containers which consist of or contain third-party software. By following this documentation you agree that using such third-party software is done at your own discretion and risk. No advice or information, whether oral or written, obtained by you from us or from this documentation shall create any warranty for the third-party software. Additionally, by following these descriptions or using the contents of this documentation, you agree that you are responsible for complying with all third party licenses applicable to such third-party software. All product names, logos, and brands are property of their respective owners. All third-party company, product and service names used in this documentation are for identification purposes only. Use of these names, logos, and brands does not imply endorsement.
