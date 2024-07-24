@@ -1,11 +1,9 @@
 version: "2.4"
-#### Services ####
 services:
-  #### Secure storage web app ####
   secure-storage-service:
     build: ./src
     image: secure-storage-app
-    restart: always
+    restart: unless-stopped
     ports:
       - "5001:5000"
     networks:
@@ -15,7 +13,6 @@ services:
       - "./publish/:/publish/"
       - "./cfg-data/:/cfg-data/"
 
-#### Networks ####
 networks:
   proxy-redirect:
     external: true
