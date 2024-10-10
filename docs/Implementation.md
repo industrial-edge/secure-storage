@@ -2,85 +2,125 @@
 
 - [Implementation](#implementation)
   - [Overview](#overview)
-  - [Secure Storage API Interactions](#secure-storage-api-interactions)
-    - [Mount Point](#mount-point)
-    - [Adding new key-value pair to secure storage](#adding-new-key-value-pair-to-secure-storage)
-    - [Retrieving existing key value pairs](#retrieving-existing-key-value-pairs)
-    - [API Specification](#api-specification)
+  - [Example Python implementation](#example-python-implementation)
+    - [Retrieving the certificate and token](#retrieving-the-certificate-and-token)
+    - [Using the Secure Storage API](#using-the-secure-storage-api)
 
 ## Overview
 
-The following image describes the complete structure of the implemented application and communication in between the application parts and Industrial Edge Device runtime.
+The process of using Secure Storage is described in the [Secure Storage documentation](https://docs.eu1.edge.siemens.cloud/apis_and_references/apis/api-how-tos/secure-storage.html). The implementation will depend on your choice of programming language and the availability and feature set of the necessary libraries or modules.
 
-The general interaction flow is as follows. The user interacts with the web-page (front-end) using displayed form and buttons. Those buttons are tied to functions in java-script code that sends HTTP requests to Flask backend on /members endpoint. Flask then forward these request to approriate Secure Storage API endpoints in the IED runtime.
+## Example Python implementation
 
-![Application Implementation Overview](./docs/../graphics/implementation_overview.png)
+### Retrieving the certificate and token
 
-## Secure Storage API Interactions
-### Mount Point
-Because the REST API uses HTTPS, certificates are required for secure communication. A mount point is used to provide the endpoint and any relevant trusted certificates to the application.
-
-The existing mount point has a JSON file that is filled with available certificates, IP addresses, and the Auth API and Secure Storage API paths needed to conduct the REST call. It can be found in all application containers at `/var/run/edgedevice/certsips.json.`
-
-In this application example the mountpoint is loaded in backend in [main.py](./../src/main.py) file. From this mountpoint the device IP and API path is extracted and used to construct the REST calls.
-
-The structure of the `certsips.json` file looks like this:
-![Example of certsips.json structure](./graphics/certsips_example.png)
-
-### Adding new key-value pair to secure storage
-To add new key-value pair to applications secure storage an POST request with the necessary data is send to `/secure-storage/keys` endpoint. This endpoint expects a key and value in a body of the request. Therefore first in the backend the check is made to see if the user provided required information. If key or value is missing, an error message is send back. Otherwise the POST request is made and information whether adding of new key-value pair was successful is send back to the user in the response.
+In order to call the Secure Storage API, the x509 certificate and JWT have to be retrieved from the pre-defined location on the Edge Device.
 
 ```python
-# Get the data from the post request
-data = json.loads(request.data)
+BASE_URL = "https://edge-iot-core.proxy-redirect:8443/b.service/api/v2/secure-storage"
+SOCKET_PATH = "unix:/var/run/edgedevice/edgeapiagent.sock"
+SPIFFE_ID = os.environ.get("EDGE_SPIFFE_ID", "spiffe://iert.siemens.com/edge-service")
 
-# Convert the data to the JSON string
-body = json.dumps(data)
+x509_source = spiffe.X509Source(socket_path=SOCKET_PATH)
 
-# If the post data payload does not contain key and value; respond with error message
-if not 'key' in data or not 'value' in data or data['key'] == '' or data['value'] == '':
-    return Response(json.dumps({
-        "errors": [
-            {
-                "message": "You must specify key and value"
-            }
-        ]
-    }), status=400)
-
-# Add the key-value pair to secure storage
-response_post = requests.request("POST", (BASE_URL + "/keys"), data=body, headers=HEADERS, verify=False)
-
-# If the reponse code == 201, adding was successful; send a confirmation message
-if response_post.status_code == 201:
-    return Response('Successfully added a member', status=201)
-else:
-    # In case of an error; send an response with error description
-    return Response(json.dumps(response_post.json()), status=response_post.status_code)
+# get x509 certificate and JSON Web Token for Secure Storage API
+with spiffe.WorkloadApiClient(socket_path=SOCKET_PATH) as client:
+    try:
+        x509_svid = client.fetch_x509_svid()
+        jwt_svid = client.fetch_jwt_svid(audience=[SPIFFE_ID])
+    except spiffe.exceptions.WorkloadApiError as e:
+        print(f"SPIFFE Workload API Error: {e}")
 
 ```
-### Retrieving existing key value pairs
-To retrieve all existing members with their values, two separate calls to the Secure Storage API needs to be done. First a get request to the `/secure-storage/keys` endpoint is made. This returns JSON payload containing list of all keys of added key-value pairs for the application. This list is then used in loop to call `/secure-storage/keys/{key}` endpoint with specific keys, to get the value for that key and costruct the response. 
+
+A particularity when using the Python "requests" module is that the certificate has to be read from a file, so the file is first saved within the container to be then read later
 
 ```python
-# Prepare key_value_pairs list for response
-key_value_pairs = []
+# certificate and key have to be saved to file as Python requests module doesn't accept raw input
+with open("tmp/cert.pem", "wb") as f:
+    f.write(
+        x509_svid.cert_chain[0].public_bytes(
+            encoding=cryptography.hazmat.primitives.serialization.Encoding.PEM
+        )
+    )
 
-# Get all available keys from secure storage
-response = requests.request("GET", (BASE_URL + "/keys"), headers=HEADERS, verify=False).json()
-
-# If response does not contain securestoragekeys (secure storage is empty); return empty response
-if not response["securestoragekeys"]:
-    return Response({})
-
-# For each an every key call the keys endpoint to get the value
-for element in response["securestoragekeys"]:
-    response_call = requests.request("GET", (BASE_URL + "/keys/" + element), headers=HEADERS,verify=False).json()
-    # Add the values to response list
-    key_value_pairs.append(response_call)
-
-# Return the complete list of all members in secure storage
-return Response(json.dumps(key_value_pairs))
+with open("tmp/key.key", "wb") as f:
+    f.write(
+        x509_svid.private_key.private_bytes(
+            encoding=cryptography.hazmat.primitives.serialization.Encoding.PEM,
+            format=cryptography.hazmat.primitives.serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=cryptography.hazmat.primitives.serialization.NoEncryption(),
+        )
+    )
 ```
 
-### API Specification
-For all available Secure Storage API Endpoints, their format, input and output values, please refer to the [IED Secure Storage OpenAPI Specification](https://docs.eu1.edge.siemens.cloud/developer/platform/references/ied/secure-storage-api.html).
+### Using the Secure Storage API
+
+Using the Secure Storage mechanism then amounts to calling the Secure Storage API (as documented in the [IED Secure Storage API Documentation](https://docs.eu1.edge.siemens.cloud/apis_and_references/apis/ied/secure-storage-api-2.0.0.html)) using the provided client certificate and using the JWT in the API call header.
+
+```python
+HEADERS = {
+    "accept": "*/*",
+    "Content-Type": "application/json",
+    "Authorization": f"JWT {jwt_svid.token}",
+}
+```
+
+Obtaining existing key-value pairs from Secure Storage happens through a GET request:
+
+```python
+if request.method == "GET":
+        response = requests.request(
+            "GET",
+            (BASE_URL + "/keys"),
+            headers=HEADERS,
+            cert=("tmp/cert.pem", "tmp/key.key"),
+            verify=False,
+        ).json()
+
+        if not response["securestoragekeys"]:
+            return Response({})
+        for element in response["securestoragekeys"]:
+            response_call = requests.request(
+                "GET",
+                (BASE_URL + "/keys/" + element),
+                headers=HEADERS,
+                cert=("tmp/cert.pem", "tmp/key.key"),
+                verify=False,
+            ).json()
+            key_value_pairs.append(response_call)
+        return Response(json.dumps(key_value_pairs))
+```
+
+And submitting a new key-value pair is done through a POST request:
+
+```python
+if request.method == "POST":
+        data = json.loads(request.data)
+        body = json.dumps(data)
+        if (
+            not "key" in data
+            or not "value" in data
+            or data["key"] == ""
+            or data["value"] == ""
+        ):
+            return Response(
+                json.dumps({"errors": [{"message": "You must specify key and value"}]}),
+                status=400,
+            )
+
+        response_post = requests.request(
+            "POST",
+            (BASE_URL + "/keys"),
+            data=body,
+            headers=HEADERS,
+            cert=("tmp/cert.pem", "tmp/key.key"),
+            verify=False,
+        )
+        if response_post.status_code == 201:
+            return Response("Successfully added a member", status=201)
+        else:
+            return Response(
+                json.dumps(response_post.json()), status=response_post.status_code
+            )
+```

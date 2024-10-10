@@ -106,7 +106,3 @@ def members():
             return Response(
                 json.dumps(response_post.json()), status=response_post.status_code
             )
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=False)
