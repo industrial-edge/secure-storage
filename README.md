@@ -47,7 +47,7 @@ This repository demonstrates how to use this API in a simple web application. Th
 
 ## Installation
 
-You can find the installation steps in the [docs](./docs).
+You can find the installation steps in the [docs](./docs/Installation.md).
 
 ## Usage
 
