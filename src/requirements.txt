@@ -1,5 +1,4 @@
 Flask==3.0.3
-MarkupSafe==2.1.5
 Requests==2.32.0
 spiffe==0.1.2
 protobuf==5.27.2
