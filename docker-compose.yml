@@ -1,14 +1,19 @@
 version: "2.4"
 services:
-  secure-storage-service:
+  flask:
     build: ./src
-    image: secure-storage-app
+    image: secure-storage-app:v1
     restart: unless-stopped
     ports:
-      - "5001:5000"
+      - "5000:5000"
     networks:
-      proxy-redirect: null
-    mem_limit: 300mb
+      - proxy-redirect
+    mem_limit: 128mb
+    logging:
+      options:
+        max-size: 10m
+        max-file: "2"
+      driver: json-file
     volumes:
       - "./publish/:/publish/"
       - "./cfg-data/:/cfg-data/"
